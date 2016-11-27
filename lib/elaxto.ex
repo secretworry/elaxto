@@ -3,6 +3,8 @@ defmodule Elaxto do
 
   @type error :: error
   @type opts :: Keyword.t
+  @type document_type :: atom
+  @type data :: map
 
-  @callback index(Ecto.Schema.t, opts) :: Elaxtor.DocumentAction.t
+  @callback index(document_type, data, opts) :: Elaxtor.DocumentAction.t
 end
