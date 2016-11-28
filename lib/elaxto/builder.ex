@@ -7,6 +7,14 @@ defmodule Elaxto.Builder do
     quote do
       use Elaxto.Builder.Notation
       @before_compile Elaxto.Builder
+
+      def index(type, data, _opts \\[]) do
+        type = case __elaxto_field__(type) do
+          nil -> raise ArgumentError, "type #{type} is not defined in #{inspect __MODULE__}"
+          type -> type
+        end
+        Elaxto.DocumentAction.IndexBuilder.build(type, data)
+      end
     end
   end
 
@@ -95,13 +103,8 @@ defmodule Elaxto.Builder do
 
   defp quote_field_fields(fields, acc) when is_list(fields) do
     Enum.reduce(fields, acc, fn {field_name, attrs}, acc ->
-      case Keyword.get(attrs, :type) do
-        :field ->
-          field_ast = quote do: %Elaxto.Schema.Field{unquote_splicing(attrs)}
-          [{field_name, field_ast} | acc]
-        _ ->
-          acc
-      end
+      field_ast = quote do: %Elaxto.Schema.Field{unquote_splicing(attrs)}
+      [{field_name, field_ast} | acc]
     end)
   end
 end

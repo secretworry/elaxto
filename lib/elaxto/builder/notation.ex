@@ -18,22 +18,22 @@ defmodule Elaxto.Builder.Notation do
 
   defmacro field(identifier, type) do
     __CALLER__
-    |> record_field(:field, identifier, type, [], nil)
+    |> record_field(identifier, type, [], nil)
   end
 
   defmacro field(identifier, type, [do: block]) do
     __CALLER__
-    |> record_field(:field, identifier, type, [], block)
+    |> record_field(identifier, type, [], block)
   end
 
   defmacro field(identifier, type, attrs) when is_list(attrs) do
     __CALLER__
-    |> record_field(:field, identifier, type, attrs, nil)
+    |> record_field(identifier, type, attrs, nil)
   end
 
   defmacro field(identifier, type, attrs, [do: block]) do
     __CALLER__
-    |> record_field(:field, identifier, type, attrs, block)
+    |> record_field(identifier, type, attrs, block)
   end
 
   defmacro resolver(resolver) do
@@ -48,11 +48,10 @@ defmodule Elaxto.Builder.Notation do
     scope(env, :type, identifier, attrs, block)
   end
 
-  defp record_field(env, type, identifier, field_type, attrs, block) do
+  defp record_field(env, identifier, type, attrs, block) do
 
     attrs = []
     |> Keyword.put(:type, type)
-    |> Keyword.put(:field_type, field_type)
     |> Keyword.put(:parameters, attrs |> Enum.into(%{}) |> Macro.escape)
 
     scope(env, :field, identifier, attrs, block)
@@ -119,21 +118,5 @@ defmodule Elaxto.Builder.Notation do
 
   def get_types(module) do
     types = Module.get_attribute(module, @type_attributes) || []
-  end
-
-  defp quote_define_fields(nil) do
-    quote do: %{}
-  end
-
-  defp quote_define_fields(fields) when is_list(fields) do
-    fields_ast = for {field_name, attrs} <- fields do
-      field_ast = quote do: %Elaxto.Schema.Field{unquote_splicing(attrs)}
-      {field_name, field_ast}
-    end
-    quote do: %{unquote_splicing(fields_ast)}
-  end
-
-  defp build_meta(attrs) do
-    %Elaxto.Schema.Type.Meta{all: !!Keyword.get(attrs, :all)}
   end
 end

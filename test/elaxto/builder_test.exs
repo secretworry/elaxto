@@ -46,17 +46,17 @@ defmodule Elaxto.BuilderTest do
         name: :product,
         meta: %Elaxto.Schema.Type.Meta{all: false},
         fields: %{
-          desc: %Elaxto.Schema.Field{field_type: :text, name: :desc, parameters: %{}, resolver: nil, type: :field},
-          name: %Elaxto.Schema.Field{field_type: :keyword, name: :name, parameters: %{}, resolver: nil, type: :field},
-          tags: %Elaxto.Schema.Field{field_type: {:list, :text}, name: :tags, parameters: %{}, resolver: nil, type: :field}
+          desc: %Elaxto.Schema.Field{type: :text, name: :desc, parameters: %{}, resolver: nil},
+          name: %Elaxto.Schema.Field{type: :keyword, name: :name, parameters: %{}, resolver: nil},
+          tags: %Elaxto.Schema.Field{type: {:list, :text}, name: :tags, parameters: %{}, resolver: nil}
         }
       }
-    assert ProductElaxto.__elaxto_field__(:name) == %Elaxto.Schema.Field{field_type: :keyword, name: :name, parameters: %{}, resolver: nil, type: :field}
+    assert ProductElaxto.__elaxto_field__(:name) == %Elaxto.Schema.Field{type: :keyword, name: :name, parameters: %{}, resolver: nil}
     assert ProductElaxto.__elaxto_fields__() == %{
-      desc: %Elaxto.Schema.Field{field_type: :text, name: :desc, parameters: %{}, resolver: nil, type: :field},
-      name: %Elaxto.Schema.Field{field_type: :keyword, name: :name, parameters: %{}, resolver: nil, type: :field},
-      tags: %Elaxto.Schema.Field{field_type: {:list, :text}, name: :tags, parameters: %{}, resolver: nil, type: :field},
-      brand_name: %Elaxto.Schema.Field{field_type: :keyword, name: :brand_name, parameters: %{}, resolver: nil, type: :field}
+      desc: %Elaxto.Schema.Field{type: :text, name: :desc, parameters: %{}, resolver: nil},
+      name: %Elaxto.Schema.Field{type: :keyword, name: :name, parameters: %{}, resolver: nil},
+      tags: %Elaxto.Schema.Field{type: {:list, :text}, name: :tags, parameters: %{}, resolver: nil},
+      brand_name: %Elaxto.Schema.Field{type: :keyword, name: :brand_name, parameters: %{}, resolver: nil}
     }
   end
 
