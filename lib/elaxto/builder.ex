@@ -12,6 +12,8 @@ defmodule Elaxto.Builder do
 
   defmacro __before_compile__(env) do
     definition = build_definition(env)
+    types = definition.types
+    fields = definition.fields
     [
       definition.type_definitions,
       quote do
@@ -20,6 +22,12 @@ defmodule Elaxto.Builder do
       definition.field_definitions,
       quote do
         def __elaxto_field__(_), do: nil
+      end,
+      quote do
+        def __elaxto_types__(), do: %{unquote_splicing(types)}
+      end,
+      quote do
+        def __elaxto_fields__(), do: %{unquote_splicing(fields)}
       end
     ]
   end
@@ -44,13 +52,13 @@ defmodule Elaxto.Builder do
           fields: unquote(fields_ast)
         }
       end}
-    end) |> Enum.into(%{})
+    end)
     %{definition | types: types}
   end
 
   defp update_fields(definition, types) do
-    fields = Enum.reduce(types, Map.new, fn {_, type_attrs}, map ->
-      quote_field_fields(type_attrs[:fields] || [], map)
+    fields = Enum.reduce(types, [], fn {_, type_attrs}, acc ->
+      quote_field_fields(type_attrs[:fields] || [], acc)
     end)
     %{definition | fields: fields}
   end
@@ -90,7 +98,7 @@ defmodule Elaxto.Builder do
       case Keyword.get(attrs, :type) do
         :field ->
           field_ast = quote do: %Elaxto.Schema.Field{unquote_splicing(attrs)}
-          Map.put(acc, field_name, field_ast)
+          [{field_name, field_ast} | acc]
         _ ->
           acc
       end
