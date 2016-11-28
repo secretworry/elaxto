@@ -46,6 +46,7 @@ defmodule Elaxto.BuilderTest do
           tags: %Elaxto.Schema.Field{field_type: {:list, :text}, name: :tags, parameters: %{}, resolver: nil, type: :field}
         }
       }
+    assert ProductElaxto.__elaxto_field__(:name) == %Elaxto.Schema.Field{field_type: :keyword, name: :name, parameters: %{}, resolver: nil, type: :field}
   end
 
   test "define type with resolver" do
