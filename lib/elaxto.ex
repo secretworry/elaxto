@@ -6,5 +6,6 @@ defmodule Elaxto do
   @type document_type :: atom
   @type data :: map
 
+  @callback index(document_type, data) :: Elaxtor.DocumentAction.t
   @callback index(document_type, data, opts) :: Elaxtor.DocumentAction.t
 end
