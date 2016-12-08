@@ -22,7 +22,7 @@ defmodule Elaxto.Query.Builder do
 
   defp pre({:^, _, [expr]}, context) do
     context = context |> push_stack({:escape, expr})
-    # no further traverse on the subtree, but will added a {:value, :nil} on the stack, we will handle it in the merge call
+    # no further traverse on the subtree
     {:nil, context}
   end
 
@@ -64,10 +64,6 @@ defmodule Elaxto.Query.Builder do
     [current, parent | rest] = stack
     new_node = do_merge(current, parent)
     %{context | stack: [new_node|rest]}
-  end
-
-  defp do_merge(_ignore, {:escape, expr}) do
-    {:escape, expr}
   end
 
   defp do_merge(current, {:call, call, nil}) do

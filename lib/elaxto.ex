@@ -1,17 +1,87 @@
 defmodule Elaxto do
 
+  @type t :: module
+
   @type action ::
     Elaxto.DocumentAction.t
   | Elaxto.IndexAction.t
-  | Elaxto.SearchAction.t
 
   @type response_t :: {:ok, Map.t} | {:error, any}
 
-  @type queriable_t :: atom | {atom, atom} | {atom, [atom]}
+  @type queriable_t :: atom | {atom, atom} | {atom, [atom]} | {atom, atom, any} | [atom]
 
   @type query :: Map.t
 
+  @type opts :: Keyword.t
+
   @callback execute(action) :: response_t
 
-  @callback query(queriable_t, query) :: response_t
+  @callback get(queriable_t, opts) :: response_t
+  @callback post(queriable_t, query, opts) :: response_t
+  @callback put(queriable_t, query, opts) :: response_t
+  @callback delete(queriable_t, opts) :: response_t
+
+  defmacro __using__(opts) do
+    quote bind_quoted: [opts: opts] do
+      {otp_app, http_adapter, host, config} = Elaxto.parse_config(__MODULE__, opts)
+      @otp_app otp_app
+      @http_adapter http_adapter
+      @config config
+      @host host
+
+      def __http_adapter__, do: @http_adapter
+
+      defp build_request_uri(uri) do
+        URI.merge(@host, uri) |> URI.to_string
+      end
+
+      def execute(%Elaxto.DocumentAction{} = document_action) do
+        queriable = Elaxto.RequestBuilder.to_queriable(document_action)
+        query = Elaxto.RequestBuilder.to_query(document_action)
+        post(queriable, query, document_action.opts)
+      end
+
+      def execute(%Elaxto.IndexAction{} = index_action) do
+        queriable = Elaxto.RequestBuilder.to_queriable(index_action)
+        query = Elaxto.RequestBuilder.to_query(index_action)
+        put(queriable, query, index_action.opts)
+      end
+
+      def get(queriable, opts \\ []) do
+        uri = Elaxto.RequestBuilder.queriable_to_uri(queriable, opts)
+        request_uri = build_request_uri(uri)
+        @http_adapter.get(request_uri)
+      end
+
+      def post(queriable, query, opts \\ []) do
+        uri = Elaxto.RequestBuilder.queriable_to_uri(queriable, opts)
+        request_uri = build_request_uri(uri)
+        @http_adapter.post(request_uri, query)
+      end
+
+      def put(queriable, query, opts \\ []) do
+        uri = Elaxto.RequestBuilder.queriable_to_uri(queriable, opts)
+        request_uri = build_request_uri(uri)
+        @http_adapter.put(request_uri, query)
+      end
+
+      def delete(queriable, opts \\ []) do
+        uri = Elaxto.RequestBuilder.queriable_to_uri(queriable, opts)
+        request_uri = build_request_uri(uri)
+        @http_adapter.delete(request_uri)
+      end
+    end
+  end
+
+  def parse_config(module, opts) do
+    otp_app = Keyword.fetch!(opts, :otp_app)
+    config = Application.get_env(otp_app, module, [])
+    http_adapter = opts[:http_adapter] || config[:http_adapter]
+    host = opts[:host] || config[:host] || "http://localhost:9200"
+
+    unless http_adapter do
+      raise ArgumentError, "missing :http_adapter configuration in config #{inspect otp_app}, #{inspect module}"
+    end
+    {otp_app, http_adapter, host, config}
+  end
 end
