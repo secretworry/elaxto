@@ -15,8 +15,11 @@ defmodule Elaxto.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger]]
+    [applications: applications(Mix.env)]
   end
+
+  defp applications(:test), do: applications ++ [:poison, :ibrowse]
+  defp applications, do: [:logger]
 
   defp elixirc_paths(:test), do: ["lib", "web", "test/support"]
   defp elixirc_paths(_),     do: ["lib", "web"]
@@ -33,7 +36,8 @@ defmodule Elaxto.Mixfile do
   defp deps do
     [
       {:maxwell, git: "https://github.com/zhongwencool/maxwell.git", tag: "2.0.0", only: [:dev, :test]},
-      {:ibrowse, "~> 4.2", only: [:dev, :test]}
+      {:ibrowse, "~> 4.2", only: [:dev, :test]},
+      {:poison, "~> 2.1", only: [:dev, :test]}
     ]
   end
 end
