@@ -19,6 +19,7 @@ defmodule Elaxto.Mixfile do
   end
 
   defp applications(:test), do: applications ++ [:poison, :ibrowse]
+  defp applications(_), do: applications
   defp applications, do: [:logger]
 
   defp elixirc_paths(:test), do: ["lib", "web", "test/support"]
