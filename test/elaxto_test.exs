@@ -20,7 +20,7 @@ defmodule ElaxtoTest do
       }
       Elaxto.TestElaxto.execute(document_action)
       assert get_request
-          == {:post, "http://localhost:9200/index/type/", %{key: "value"}}
+          == {:post, "http://localhost:9200/test_index/type/", %{key: "value"}}
     end
 
     test "should execute a document with and id" do
@@ -40,7 +40,7 @@ defmodule ElaxtoTest do
         }
       } |> Elaxto.TestElaxto.execute
       assert get_request
-          == {:post, "http://localhost:9200/index/type/1", %{key: "value"}}
+          == {:post, "http://localhost:9200/test_index/type/1", %{key: "value"}}
     end
 
     test "should execute a index action" do
@@ -59,7 +59,7 @@ defmodule ElaxtoTest do
         mappings: mappings
       } |> Elaxto.TestElaxto.execute
       assert get_request
-          == {:put, "http://localhost:9200/test", %{"mappings" => mappings}}
+          == {:put, "http://localhost:9200/test_test", %{"mappings" => mappings}}
     end
   end
 
@@ -71,7 +71,7 @@ defmodule ElaxtoTest do
         )
       ))
       assert get_request
-          == {:post, "http://localhost:9200/post", %{
+          == {:post, "http://localhost:9200/test_post", %{
             "query" => %{
               "bool" => %{
                 "must" => %{

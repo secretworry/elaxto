@@ -48,25 +48,25 @@ defmodule Elaxto do
       end
 
       def get(queriable, opts \\ []) do
-        uri = Elaxto.RequestBuilder.queriable_to_uri(queriable, opts)
+        uri = Elaxto.RequestBuilder.queriable_to_uri(@config, queriable, opts)
         request_uri = build_request_uri(uri)
         @http_adapter.get(request_uri)
       end
 
       def post(queriable, query, opts \\ []) do
-        uri = Elaxto.RequestBuilder.queriable_to_uri(queriable, opts)
+        uri = Elaxto.RequestBuilder.queriable_to_uri(@config, queriable, opts)
         request_uri = build_request_uri(uri)
         @http_adapter.post(request_uri, query)
       end
 
       def put(queriable, query, opts \\ []) do
-        uri = Elaxto.RequestBuilder.queriable_to_uri(queriable, opts)
+        uri = Elaxto.RequestBuilder.queriable_to_uri(@config, queriable, opts)
         request_uri = build_request_uri(uri)
         @http_adapter.put(request_uri, query)
       end
 
       def delete(queriable, opts \\ []) do
-        uri = Elaxto.RequestBuilder.queriable_to_uri(queriable, opts)
+        uri = Elaxto.RequestBuilder.queriable_to_uri(@config, queriable, opts)
         request_uri = build_request_uri(uri)
         @http_adapter.delete(request_uri)
       end
@@ -82,6 +82,6 @@ defmodule Elaxto do
     unless http_adapter do
       raise ArgumentError, "missing :http_adapter configuration in config #{inspect otp_app}, #{inspect module}"
     end
-    {otp_app, http_adapter, host, config}
+    {otp_app, http_adapter, host, config |> Enum.into(%{})}
   end
 end

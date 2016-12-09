@@ -42,7 +42,8 @@ defmodule Elaxto.TestAdapter do
 end
 
 Application.put_env(:elaxto, Elaxto.TestElaxto, [
-  http_adapter: Elaxto.TestAdapter
+  http_adapter: Elaxto.TestAdapter,
+  prefix: "test_"
 ])
 
 defmodule Elaxto.TestElaxto do
