@@ -36,9 +36,9 @@ defmodule Elaxto.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:maxwell, git: "https://github.com/zhongwencool/maxwell.git", tag: "2.0.0", only: [:dev, :test]},
-      {:ibrowse, "~> 4.2", only: [:dev, :test]},
-      {:poison, "~> 2.1", only: [:dev, :test]}
+      {:maxwell, git: "https://github.com/zhongwencool/maxwell.git", tag: "2.0.0", optional: true},
+      {:ibrowse, "~> 4.2", optional: true},
+      {:poison, "~> 2.1", optional: true}
     ]
   end
 end
