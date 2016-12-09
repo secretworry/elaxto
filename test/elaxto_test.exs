@@ -4,6 +4,20 @@ defmodule ElaxtoTest do
   import Elaxto.Query
 
   describe "execute/1" do
+    test "should reject an invalid action" do
+
+      document_action = %Elaxto.DocumentAction{
+        index: :index,
+        type: :type,
+        document: %{
+          "key": "value"
+        },
+        valid?: false,
+        errors: [{"Test error", []}]
+      }
+      {:error, _} = Elaxto.TestElaxto.execute(document_action)
+    end
+
     test "should execute a document action without id" do
       set_response({:ok, %{
         "_shards" => %{"failed" => 0, "successful" => 2, "total" => 2},

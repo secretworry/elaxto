@@ -35,16 +35,28 @@ defmodule Elaxto do
         URI.merge(@host, uri) |> URI.to_string
       end
 
+      defp ensure_valid_action(action) do
+        if action.valid? do
+          {:ok, action}
+        else
+          {:error, action}
+        end
+      end
+
       def execute(%Elaxto.DocumentAction{} = document_action) do
-        queriable = Elaxto.RequestBuilder.to_queriable(document_action)
-        query = Elaxto.RequestBuilder.to_query(document_action)
-        post(queriable, query, document_action.opts)
+        with {:ok, document_action} <- ensure_valid_action(document_action) do
+          queriable = Elaxto.RequestBuilder.to_queriable(document_action)
+          query = Elaxto.RequestBuilder.to_query(document_action)
+          post(queriable, query, document_action.opts)
+        end
       end
 
       def execute(%Elaxto.IndexAction{} = index_action) do
-        queriable = Elaxto.RequestBuilder.to_queriable(index_action)
-        query = Elaxto.RequestBuilder.to_query(index_action)
-        put(queriable, query, index_action.opts)
+        with {:ok, index_action} <- ensure_valid_action(index_action) do
+          queriable = Elaxto.RequestBuilder.to_queriable(index_action)
+          query = Elaxto.RequestBuilder.to_query(index_action)
+          put(queriable, query, index_action.opts)
+        end
       end
 
       def get(queriable, opts \\ []) do
