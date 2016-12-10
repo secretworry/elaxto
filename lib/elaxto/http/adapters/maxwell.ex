@@ -6,6 +6,10 @@ defmodule Elaxto.Http.Adapters.Maxwell do
 
   def init(opts), do: opts
 
+  def ensure_all_started(type) do
+    Application.ensure_all_started(:ibrowse, type)
+  end
+
   def get(url, _opts) do
     Maxwell.Delegator.do_get(url) |> process_response
   end

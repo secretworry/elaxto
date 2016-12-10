@@ -8,6 +8,8 @@ defmodule Elaxto.Http.Adapter do
 
   @type opts :: any
 
+  @callback ensure_all_started(type :: :application.restart_type) :: {:ok, [atom]}  | {:error, atom}
+
   @callback init(Keyword.t) :: opts
 
   @callback get(url, opts) :: response_t
@@ -24,7 +26,9 @@ defmodule Elaxto.Http.Adapter do
 
       def init(opts), do: opts
 
-      defoverridable [init: 1]
+      def ensure_all_started(_), do: {:ok, []}
+
+      defoverridable [init: 1, ensure_all_started: 1]
     end
   end
 end
