@@ -83,4 +83,27 @@ defmodule Elaxto.QueryTest do
       }
     end
   end
+
+  describe "merge/2" do
+    test "should merge without error" do
+      query1 = query(
+        bool(
+          must: term(user: "kimchy")
+        )
+      )
+
+      query2 = query(
+        bool(
+          must: term(user: "remy")
+        )
+      )
+
+      assert merge(query1, query2)
+          == %{"query" =>
+                %{"bool" =>
+                  %{"must" =>
+                    %{"term" =>
+                      %{"user" => ["kimchy", "remy"]}}}}}
+    end
+  end
 end
