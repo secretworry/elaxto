@@ -8,7 +8,9 @@ defmodule Elaxto do
 
   @type response_t :: {:ok, Map.t} | {:error, any}
 
-  @type queriable_t :: atom | {atom, atom} | {atom, [atom]} | {atom, atom, any} | [atom]
+  @type index :: atom
+
+  @type queriable_t :: atom | {atom, atom} | {atom, [atom]} | {atom, atom, any} | [atom] | String.t
 
   @type query :: Map.t
 
@@ -16,13 +18,9 @@ defmodule Elaxto do
 
   @callback execute(action) :: response_t
 
-  @callback get(queriable_t) :: response_t
   @callback get(queriable_t, opts) :: response_t
-  @callback post(queriable_t, query) :: response_t
   @callback post(queriable_t, query, opts) :: response_t
-  @callback put(queriable_t, query) :: response_t
   @callback put(queriable_t, query, opts) :: response_t
-  @callback delete(queriable_t) :: response_t
   @callback delete(queriable_t, opts) :: response_t
 
   defmacro __using__(opts) do

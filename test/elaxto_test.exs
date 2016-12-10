@@ -97,6 +97,26 @@ defmodule ElaxtoTest do
             }
           }}
     end
+
+  end
+
+  describe "put/2" do
+    test "should be able to put to a raw url" do
+      request = %{
+        "properties" => %{
+          "name" => %{
+            "properties" => %{
+              "last" => %{
+                "type" => "text"
+              }
+            }
+          }
+        }
+      }
+      Elaxto.TestElaxto.put("my_index/_mapping/user", request);
+      assert get_request
+          == {:put, "http://localhost:9200/my_index/_mapping/user", request}
+    end
   end
 
   describe "delete/2" do

@@ -33,7 +33,7 @@ defmodule Elaxto.RequestBuilder do
     do_queriable_to_uri("/", opts)
   end
 
-  def queriable_to_uri(config, index, opts) when is_binary(index) or is_atom(index) do
+  def queriable_to_uri(config, index, opts) when is_atom(index) do
     do_queriable_to_uri("/#{prefix_index(config, index)}", opts)
   end
 
@@ -47,6 +47,14 @@ defmodule Elaxto.RequestBuilder do
 
   def queriable_to_uri(config, {index, type, id}, opts) do
     do_queriable_to_uri(["", prefix_index(config, index), type, id] |> Enum.join("/"), opts)
+  end
+
+  def queriable_to_uri(_config, path, opts) when is_binary(path) do
+    path = case path do
+      "/" <> _ -> path
+      path -> "/" <> path
+    end
+    do_queriable_to_uri(path, opts)
   end
 
   defp do_queriable_to_uri(path, opts) do
