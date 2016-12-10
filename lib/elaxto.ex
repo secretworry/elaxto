@@ -23,6 +23,7 @@ defmodule Elaxto do
 
   defmacro __using__(opts) do
     quote bind_quoted: [opts: opts] do
+      require Elaxto
       {otp_app, http_adapter, host, config} = Elaxto.parse_config(__MODULE__, opts)
       @otp_app otp_app
       @http_adapter http_adapter
@@ -62,27 +63,33 @@ defmodule Elaxto do
       def get(queriable, opts \\ []) do
         uri = Elaxto.RequestBuilder.queriable_to_uri(@config, queriable, opts)
         request_uri = build_request_uri(uri)
-        @http_adapter.get(request_uri)
+        Elaxto.call_http_adapter(@http_adapter, :get, [request_uri])
       end
 
       def post(queriable, query, opts \\ []) do
         uri = Elaxto.RequestBuilder.queriable_to_uri(@config, queriable, opts)
         request_uri = build_request_uri(uri)
-        @http_adapter.post(request_uri, query)
+        Elaxto.call_http_adapter(@http_adapter, :post, [request_uri, query])
       end
 
       def put(queriable, query, opts \\ []) do
         uri = Elaxto.RequestBuilder.queriable_to_uri(@config, queriable, opts)
         request_uri = build_request_uri(uri)
-        @http_adapter.put(request_uri, query)
+        Elaxto.call_http_adapter(@http_adapter, :put, [request_uri, query])
       end
 
       def delete(queriable, opts \\ []) do
         uri = Elaxto.RequestBuilder.queriable_to_uri(@config, queriable, opts)
         request_uri = build_request_uri(uri)
         @http_adapter.delete(request_uri)
+        Elaxto.call_http_adapter(@http_adapter, :delete, [request_uri])
       end
     end
+  end
+
+  def call_http_adapter({adapter, opts}, method, args) do
+    args = args ++ [opts]
+    apply(adapter, method, args)
   end
 
   def parse_config(module, opts) do
@@ -94,6 +101,15 @@ defmodule Elaxto do
     unless http_adapter do
       raise ArgumentError, "missing :http_adapter configuration in config #{inspect otp_app}, #{inspect module}"
     end
-    {otp_app, http_adapter, host, config |> Enum.into(%{})}
+    {otp_app, init_http_adapter(http_adapter), host, config |> Enum.into(%{})}
   end
+
+  defp init_http_adapter({http_adapter, opts}) do
+    {http_adapter, http_adapter.init(opts)}
+  end
+
+  defp init_http_adapter(http_adapter) when is_atom(http_adapter) do
+    {http_adapter, http_adapter.init([])}
+  end
+
 end

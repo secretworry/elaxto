@@ -6,11 +6,25 @@ defmodule Elaxto.Http.Adapter do
 
   @type url :: String.t
 
-  @callback get(url) :: response_t
+  @type opts :: any
 
-  @callback post(url, request_body) :: response_t
+  @callback init(Keyword.t) :: opts
 
-  @callback put(url, request_body) :: response_t
+  @callback get(url, opts) :: response_t
 
-  @callback delete(url) :: response_t
+  @callback post(url, request_body, opts) :: response_t
+
+  @callback put(url, request_body, opts) :: response_t
+
+  @callback delete(url, opts) :: response_t
+
+  defmacro __using__(_) do
+    quote do
+      @behaviour unquote(__MODULE__)
+
+      def init(opts), do: opts
+
+      defoverridable [init: 1]
+    end
+  end
 end

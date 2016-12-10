@@ -4,19 +4,21 @@ defmodule Elaxto.Http.Adapters.Maxwell do
 
   alias __MODULE__
 
-  def get(url) do
+  def init(opts), do: opts
+
+  def get(url, _opts) do
     Maxwell.Delegator.do_get(url) |> process_response
   end
 
-  def post(url, body) do
+  def post(url, body, _opts) do
     Maxwell.Delegator.do_post(url, body) |> process_response
   end
 
-  def put(url, body) do
+  def put(url, body, _opts) do
     Maxwell.Delegator.do_put(url, body) |> process_response
   end
 
-  def delete(url) do
+  def delete(url, _opts) do
     Maxwell.Delegator.do_delete(url) |> process_response
   end
 

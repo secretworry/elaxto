@@ -1,23 +1,23 @@
 defmodule Elaxto.TestAdapter do
-  @behaviour Elaxto.Http.Adapter
+  use Elaxto.Http.Adapter
 
   def start_link do
     Agent.start_link(fn -> %{request: nil, response: nil} end, name: __MODULE__)
   end
 
-  def get(url) do
+  def get(url, _opts) do
     get_response_with({:get, url})
   end
 
-  def post(url, body) do
+  def post(url, body, _opts) do
     get_response_with({:post, url, body})
   end
 
-  def put(url, body) do
+  def put(url, body, _opts) do
     get_response_with({:put, url, body})
   end
 
-  def delete(url) do
+  def delete(url, _opts) do
     get_response_with({:delete, url})
   end
 
