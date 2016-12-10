@@ -27,7 +27,7 @@ defmodule Elaxto.Query.Builder do
   end
 
   defp pre({query, _, _} = node, context) do
-    context = context |> push_stack({:call, to_string(query), nil})
+    context = context |> push_stack({:call, to_string(query), nil, nil})
     {node, context}
   end
 
@@ -63,11 +63,60 @@ defmodule Elaxto.Query.Builder do
   defp pop_and_merge(%{stack: stack} = context) do
     [current, parent | rest] = stack
     new_node = do_merge(current, parent)
+    IO.puts "do_merge(#{inspect current}, #{inspect parent}) = #{inspect new_node}"
     %{context | stack: [new_node|rest]}
   end
 
-  defp do_merge(current, {:call, call, nil}) do
-    {:call, call, finalize_value(:call, current)}
+  defp call_value_type({_, _}), do: :pair
+  defp call_value_type([{_, _}|_]), do: :map
+  defp call_value_type(list) when is_list(list), do: :list
+
+  defp call_value_type(_), do: :item
+
+  defp do_merge(current, {:call, call, nil, nil}) do
+    value = finalize_value(:call, current)
+    type = call_value_type(value)
+    case type do
+      :item -> {:call, call, :item, value}
+      :pair -> {:call, call, :map, [value]}
+      :map  -> {:call, call, :map, value}
+      :list -> {:call, call, :list, value}
+    end
+
+  end
+
+  defp do_merge(current, {:call, call, :item, value}) do
+    new_value = finalize_value(:call, current)
+    type = call_value_type(value)
+    case type do
+      :item -> {:call, call, :list, [new_value, value]}
+      :pair -> {:call, call, :list, [new_value, value]}
+      :map  -> {:call, call, :list, new_value ++ [value]}
+      :list -> {:call, call, :list, new_value ++ [value]}
+    end
+
+  end
+
+  defp do_merge(current, {:call, call, :map, value}) do
+    new_value = finalize_value(:call, current)
+    type = call_value_type(new_value)
+    case type do
+      :map  -> {:call, call, :map, new_value ++ value}
+      :pair -> {:call, call, :map, [new_value | value]}
+      :item -> {:call, call, :list, [new_value | value]}
+      :list -> {:call, call, :list, new_value ++ value}
+    end
+  end
+
+  defp do_merge(current, {:call, call, :list, value}) do
+    new_value = finalize_value(:call, current)
+    type = call_value_type(new_value)
+    case type do
+      :map  -> {:call, call, :list, new_value ++ value}
+      :pair -> {:call, call, :list, [new_value | value]}
+      :item -> {:call, call, :list, [new_value | value]}
+      :list -> {:call, call, :list, new_value ++ value}
+    end
   end
 
   defp do_merge({:list, :call, list}, {:list, nil, []}) do
@@ -113,6 +162,10 @@ defmodule Elaxto.Query.Builder do
     end
   end
 
+  defp finalize_value(:call, {:map, map}) do
+    map
+  end
+
   defp finalize_value(_parent, {:map, map}) do
     quote do
       %{unquote_splicing(map |> Enum.reverse)}
@@ -131,15 +184,15 @@ defmodule Elaxto.Query.Builder do
     end
   end
 
-  defp finalize_value(:map, {:call, key, value}) do
+  defp finalize_value(parent, {:call, key, type, value}) when parent in [:map, :call] do
     quote do
-      {unquote(key), unquote(value || (%{} |> Macro.escape))}
+      {unquote(key), unquote(finalize_call_value(type, value))}
     end
   end
 
-  defp finalize_value(_parent, {:call, key, value}) do
+  defp finalize_value(_parent, {:call, key, type, value}) do
     quote do
-      %{unquote({key, value || (%{} |> Macro.escape)})}
+      %{unquote({key, finalize_call_value(type, value)})}
     end
   end
 
@@ -160,4 +213,26 @@ defmodule Elaxto.Query.Builder do
   end
 
   defp finalize_value(_parent, value), do: value
+
+  defp finalize_call_value(nil, value), do: quote(do: %{})
+
+  defp finalize_call_value(:item, value), do: value
+
+  defp finalize_call_value(:map, values) do
+    quote do
+      %{unquote_splicing(values |> Enum.reverse)}
+    end
+  end
+
+  defp finalize_call_value(:list, value) do
+    list_values = value
+    |> Enum.reverse
+    |> Enum.map(fn
+      {key, value} -> quote do: %{unquote({key, value})}
+      value -> value
+    end)
+    quote do
+      [unquote_splicing(list_values)]
+    end
+  end
 end

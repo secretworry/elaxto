@@ -84,6 +84,27 @@ defmodule Elaxto.QueryTest do
     end
   end
 
+
+  describe "suggest/1" do
+    test "smork case" do
+      assert suggest(
+        my_suggestion(
+          term(field: "message"),
+          text: "trying out Elasticsearch"
+        )
+      ) == %{
+        "suggest" => %{
+          "my_suggestion" => %{
+            "text" => "trying out Elasticsearch",
+            "term" => %{
+              "field" => "message"
+            }
+          }
+        }
+      }
+    end
+  end
+
   describe "merge/2" do
     test "should merge without error" do
       query1 = query(

@@ -33,4 +33,16 @@ defmodule Elaxto.Query.BuilderTest do
     assert build(ast)
         == quote do: %{"foo" => %{"tar" => value}}
   end
+
+  test "should support mix call and keyword in call params" do
+    ast = quote do: foo(term(name: "name"), text: "search term")
+    assert build(ast)
+        == quote do: %{"foo" => %{"term" => %{"name" => "name"}, "text" => "search term"}}
+  end
+
+  test "should support mix call and constants in call params" do
+    ast = quote do: foo(term(name: "name"), "search term")
+    assert build(ast)
+        == quote do: %{"foo" => [%{"term" => %{"name" => "name"}}, "search term"]}
+  end
 end
