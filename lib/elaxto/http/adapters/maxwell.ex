@@ -6,7 +6,7 @@ defmodule Elaxto.Http.Adapters.Maxwell do
 
   def init(opts), do: opts
 
-  def ensure_all_started(type) do
+  def ensure_all_started(type, _opts) do
     Application.ensure_all_started(:ibrowse, type)
   end
 
