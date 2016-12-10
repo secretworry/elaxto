@@ -98,4 +98,13 @@ defmodule ElaxtoTest do
           }}
     end
   end
+
+  describe "delete/2" do
+    test "should execute a delte query" do
+      Elaxto.TestElaxto.delete(:post)
+
+      assert get_request
+          == {:delete, "http://localhost:9200/test_post"}
+    end
+  end
 end
