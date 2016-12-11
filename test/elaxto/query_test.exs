@@ -103,6 +103,24 @@ defmodule Elaxto.QueryTest do
         }
       }
     end
+
+    test "should be able to merge maps into maps" do
+      assert suggest(
+        user_suggest: [
+          prefix: "prefix",
+          complection: [field: "suggest"]
+        ]
+      ) == %{
+        "suggest" => %{
+          "user_suggest" => %{
+            "prefix" => "prefix",
+            "complection" => %{
+              "field" => "suggest"
+            }
+          }
+        }
+      }
+    end
   end
 
   describe "merge/2" do

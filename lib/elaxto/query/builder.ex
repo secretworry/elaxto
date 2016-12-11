@@ -63,6 +63,7 @@ defmodule Elaxto.Query.Builder do
   defp pop_and_merge(%{stack: stack} = context) do
     [current, parent | rest] = stack
     new_node = do_merge(current, parent)
+    #IO.puts("do_merge(#{inspect current}, #{inspect parent}) = #{inspect new_node}")
     %{context | stack: [new_node|rest]}
   end
 
@@ -137,6 +138,10 @@ defmodule Elaxto.Query.Builder do
   defp do_merge(current, {:list, list_type, list}) do
     item_type = elem(current, 0)
     {:list, list_type(item_type, list_type), [ finalize_value(:list, current) | list]}
+  end
+
+  defp do_merge({:map, child_map}, {:map, map}) do
+    {:map, child_map ++ map}
   end
 
   defp do_merge(current, {:map, map}) do
