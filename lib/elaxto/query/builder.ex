@@ -63,7 +63,6 @@ defmodule Elaxto.Query.Builder do
   defp pop_and_merge(%{stack: stack} = context) do
     [current, parent | rest] = stack
     new_node = do_merge(current, parent)
-    IO.puts "do_merge(#{inspect current}, #{inspect parent}) = #{inspect new_node}"
     %{context | stack: [new_node|rest]}
   end
 
