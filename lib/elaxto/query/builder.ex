@@ -218,7 +218,7 @@ defmodule Elaxto.Query.Builder do
 
   defp finalize_value(_parent, value), do: value
 
-  defp finalize_call_value(nil, value), do: quote(do: %{})
+  defp finalize_call_value(nil, _value), do: quote(do: %{})
 
   defp finalize_call_value(:item, value), do: value
 
