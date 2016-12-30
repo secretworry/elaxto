@@ -86,7 +86,7 @@ defmodule Elaxto.QueryTest do
 
 
   describe "suggest/1" do
-    test "smork case" do
+    test "smoke case" do
       assert suggest(
         my_suggestion(
           term(field: "message"),
@@ -116,6 +116,28 @@ defmodule Elaxto.QueryTest do
             "prefix" => "prefix",
             "complection" => %{
               "field" => "suggest"
+            }
+          }
+        }
+      }
+    end
+  end
+
+  describe "aggregations/1" do
+    test "smoke case" do
+      assert aggregations(
+        red_products(
+          filter(term(color: "red")),
+          aggs(
+            avg_price(avg(field: "price"))
+          )
+        )
+      ) == %{
+        "aggs" => %{
+          "red_products" => %{
+            "filter" => %{ "term" => %{ "color" => "red" } },
+            "aggs" => %{
+              "avg_price" => %{ "avg" => %{ "field" => "price"} }
             }
           }
         }

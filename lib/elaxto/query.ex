@@ -16,6 +16,13 @@ defmodule Elaxto.Query do
     end
   end
 
+  defmacro aggregations(body) do
+    ast = Elaxto.Query.Builder.build(body)
+    quote do
+      %{"aggs" => unquote(ast)}
+    end
+  end
+
   def merge(query1, query2) when is_map(query1) and is_map(query2)do
     do_merge(query1, query2)
   end
