@@ -145,6 +145,26 @@ defmodule Elaxto.QueryTest do
     end
   end
 
+  describe "sort/1" do
+    test "smoke case" do
+      assert sort(["offer.price": %{mode: "avg", order: "asc", nested_path: "offer", nested_filter: term("offer.color": "blue")}])
+          == %{
+            "sort" => [%{
+              "offer.price" => %{
+                "mode" => "avg",
+                "order" => "asc",
+                "nested_path" => "offer",
+                "nested_filter" => %{
+                  "term" => %{
+                    "offer.color" => "blue"
+                  }
+                }
+              }
+            }]
+          }
+    end
+  end
+
   describe "merge/2" do
     test "should merge without error" do
       query1 = query(

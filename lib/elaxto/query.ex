@@ -23,6 +23,13 @@ defmodule Elaxto.Query do
     end
   end
 
+  defmacro sort(body) do
+    ast = Elaxto.Query.Builder.build(body, :list)
+    quote do
+      %{"sort" => unquote(ast)}
+    end
+  end
+
   def merge(query1, query2) when is_map(query1) and is_map(query2)do
     do_merge(query1, query2)
   end

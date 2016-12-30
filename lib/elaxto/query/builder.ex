@@ -9,11 +9,19 @@ defmodule Elaxto.Query.Builder do
 
   defstruct [stack: []]
 
-  def build(ast) do
-    context = create_context() |> push_stack({:map, []})
+  def build(ast, base_type \\ :map) do
+    context = create_context() |> push_stack(base_type(base_type))
     {_, context} = Macro.traverse(ast, context, &pre/2, &post/2)
     %{stack: [value]} = context
     finalize_value(:map, value)
+  end
+
+  defp base_type(:map) do
+    {:map, []}
+  end
+
+  defp base_type(:list) do
+    {:list, nil, []}
   end
 
   defp create_context() do
@@ -24,6 +32,11 @@ defmodule Elaxto.Query.Builder do
     context = context |> push_stack({:escape, expr})
     # no further traverse on the subtree
     {:nil, context}
+  end
+
+  defp pre({:%{}, _, _} = node, context) do
+    context = context |> push_stack({:map, []})
+    {node, context}
   end
 
   defp pre({query, _, _} = node, context) do
