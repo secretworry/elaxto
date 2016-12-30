@@ -82,6 +82,21 @@ defmodule Elaxto.QueryTest do
         }
       }
     end
+
+    test "escape complex fields" do
+      query = "query"
+      assert query(
+        multi_match(
+          query: ^query,
+          fields: ^["field0.raw", "field1.raw"]
+        )
+      ) == %{"query" => %{
+        "multi_match" => %{
+          "query" => "query",
+          "fields" => ["field0.raw", "field1.raw"]
+        }
+      }}
+    end
   end
 
 
