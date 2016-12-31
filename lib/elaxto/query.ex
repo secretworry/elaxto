@@ -34,6 +34,8 @@ defmodule Elaxto.Query do
     do_merge(query1, query2)
   end
 
+  def a &&& b, do: merge(a, b)
+
   defp do_merge(nil, query2), do: query2
   defp do_merge(query1, nil), do: query1
 
