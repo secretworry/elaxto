@@ -37,7 +37,7 @@ defmodule ElaxtoTest do
           == {:post, "http://localhost:9200/test_index/type/", %{key: "value"}}
     end
 
-    test "should execute a document with and id" do
+    test "should execute a document action with id" do
       id = 1
       set_response({:ok, %{
         "_shards" => %{"failed" => 0, "successful" => 2, "total" => 2},
@@ -55,6 +55,37 @@ defmodule ElaxtoTest do
       } |> Elaxto.TestElaxto.execute
       assert get_request
           == {:post, "http://localhost:9200/test_index/type/1", %{key: "value"}}
+    end
+
+    test "should reject executing a delete document action without id" do
+      {:error, _} = %Elaxto.DocumentAction{
+        action: :delete,
+        index: :index,
+        type: :type,
+      } |> Elaxto.TestElaxto.execute
+    end
+
+    test "should execute a delete document action" do
+      set_response({:ok, %{
+        "found" => true,
+        "_index" => "product",
+        "_type" => "product",
+        "_id" => "1",
+        "_version" => 2,
+        "result" => "deleted",
+        "_shards" => %{
+          "total" => 2,
+          "successful" => 1,
+          "failed" => 0
+        }}})
+      %Elaxto.DocumentAction{
+        id: 1,
+        action: :delete,
+        index: :index,
+        type: :type,
+      } |> Elaxto.TestElaxto.execute
+      assert get_request
+          == {:delete, "http://localhost:9200/test_index/type/1"}
     end
 
     test "should execute a index action" do

@@ -46,11 +46,22 @@ defmodule Elaxto do
         end
       end
 
-      def execute(%Elaxto.DocumentAction{} = document_action) do
+      def execute(%Elaxto.DocumentAction{action: :index} = document_action) do
         with {:ok, document_action} <- ensure_valid_action(document_action) do
           queriable = Elaxto.RequestBuilder.to_queriable(document_action)
           query = Elaxto.RequestBuilder.to_query(document_action)
           post(queriable, query, document_action.opts)
+        end
+      end
+
+      def execute(%Elaxto.DocumentAction{action: :delete, id: nil} = document_action) do
+        {:error, "id for Elaxto.DocumentAction with delete action should not be nil"}
+      end
+
+      def execute(%Elaxto.DocumentAction{action: :delete} = document_action) do
+        with {:ok, document_action} <- ensure_valid_action(document_action) do
+          queriable = Elaxto.RequestBuilder.to_queriable(document_action)
+          delete(queriable, document_action.opts)
         end
       end
 
