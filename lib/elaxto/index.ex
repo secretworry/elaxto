@@ -14,5 +14,5 @@ defmodule Elaxto.Index do
 
   @callback index(type, model, opts) :: Elaxto.DocumentAction.t
 
-  @callback remove(type, model, opts) :: Elaxto.DocumentAction.t
+  @callback delete(type, model, opts) :: Elaxto.DocumentAction.t
 end
