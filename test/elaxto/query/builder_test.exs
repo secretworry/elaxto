@@ -45,4 +45,10 @@ defmodule Elaxto.Query.BuilderTest do
     assert build(ast)
         == quote do: %{"foo" => [%{"term" => %{"name" => "name"}}, "search term"]}
   end
+
+  test "should support convert boolean values" do
+    ast = quote do: foo(bool: true)
+    assert build(ast)
+        == quote do: %{"foo" => %{"bool" => true}}
+  end
 end

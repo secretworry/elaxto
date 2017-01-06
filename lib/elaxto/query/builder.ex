@@ -213,6 +213,10 @@ defmodule Elaxto.Query.Builder do
     end
   end
 
+  defp finalize_value(_parent, {:value, value}) when is_boolean(value) do
+    value
+  end
+
   defp finalize_value(_parent, {:value, value}) when is_atom(value) do
     to_string(value)
   end
