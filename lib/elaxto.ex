@@ -21,7 +21,9 @@ defmodule Elaxto do
   @callback get(queriable_t, opts) :: response_t
   @callback post(queriable_t, query, opts) :: response_t
   @callback put(queriable_t, query, opts) :: response_t
-  @callback delete(queriable_t, opts) :: response_t
+  @callback delete(queriable_t) :: response_t
+  @callback delete(queriable_t, query) :: response_t
+  @callback delete(queriable_t, query, opts) :: response_t
 
   defmacro __using__(opts) do
     quote bind_quoted: [opts: opts] do
@@ -61,7 +63,7 @@ defmodule Elaxto do
       def execute(%Elaxto.DocumentAction{action: :delete} = document_action) do
         with {:ok, document_action} <- ensure_valid_action(document_action) do
           queriable = Elaxto.RequestBuilder.to_queriable(document_action)
-          delete(queriable, document_action.opts)
+          delete(queriable, nil, document_action.opts)
         end
       end
 
@@ -91,10 +93,10 @@ defmodule Elaxto do
         Elaxto.call_http_adapter(@http_adapter, :put, [request_uri, query])
       end
 
-      def delete(queriable, opts \\ []) do
+      def delete(queriable, query \\ nil, opts \\ []) do
         uri = Elaxto.RequestBuilder.queriable_to_uri(@config, queriable, opts)
         request_uri = build_request_uri(uri)
-        Elaxto.call_http_adapter(@http_adapter, :delete, [request_uri])
+        Elaxto.call_http_adapter(@http_adapter, :delete, [request_uri, query])
       end
     end
   end

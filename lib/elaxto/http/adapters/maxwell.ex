@@ -22,8 +22,8 @@ defmodule Elaxto.Http.Adapters.Maxwell do
     Maxwell.Delegator.do_put(url, body) |> process_response
   end
 
-  def delete(url, _opts) do
-    Maxwell.Delegator.do_delete(url) |> process_response
+  def delete(url, body, _opts) do
+    Maxwell.Delegator.do_delete(url, body) |> process_response
   end
 
   defp process_response({:ok, %Elixir.Maxwell.Conn{status: status} = conn}) when status in 200..299 do
@@ -61,8 +61,8 @@ defmodule Elaxto.Http.Adapters.Maxwell do
       Elixir.Maxwell.Conn.new(url) |> put_req_body(body) |> put
     end
 
-    def do_delete(url) do
-      Elixir.Maxwell.Conn.new(url) |> delete
+    def do_delete(url, body) do
+      Elixir.Maxwell.Conn.new(url) |> put_req_body(body) |> delete
     end
   end
 end

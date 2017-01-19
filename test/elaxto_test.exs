@@ -85,7 +85,7 @@ defmodule ElaxtoTest do
         type: :type,
       } |> Elaxto.TestElaxto.execute
       assert get_request
-          == {:delete, "http://localhost:9200/test_index/type/1"}
+          == {:delete, "http://localhost:9200/test_index/type/1", nil}
     end
 
     test "should execute a index action" do
@@ -151,11 +151,18 @@ defmodule ElaxtoTest do
   end
 
   describe "delete/2" do
-    test "should execute a delte query" do
+    test "should execute a delete query" do
       Elaxto.TestElaxto.delete(:post)
 
       assert get_request
-          == {:delete, "http://localhost:9200/test_post"}
+          == {:delete, "http://localhost:9200/test_post", nil}
+    end
+
+    test "shold execute a delete by query" do
+      Elaxto.TestElaxto.delete(:post, %{"query" => %{"match_all" => %{}}})
+
+      assert get_request
+          == {:delete, "http://localhost:9200/test_post", %{"query" => %{"match_all" => %{}}}}
     end
   end
 end

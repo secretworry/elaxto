@@ -17,8 +17,8 @@ defmodule Elaxto.TestAdapter do
     get_response_with({:put, url, body})
   end
 
-  def delete(url, _opts) do
-    get_response_with({:delete, url})
+  def delete(url, body, _opts) do
+    get_response_with({:delete, url, body})
   end
 
   def get_response_with(request) do

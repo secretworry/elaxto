@@ -2,7 +2,7 @@ defmodule Elaxto.Http.Adapter do
 
   @type response_t :: {:ok, Map.t} | {:error, any}
 
-  @type request_body :: Map.t | String.t
+  @type request_body :: Map.t | String.t | nil
 
   @type url :: String.t
 
@@ -18,7 +18,7 @@ defmodule Elaxto.Http.Adapter do
 
   @callback put(url, request_body, opts) :: response_t
 
-  @callback delete(url, opts) :: response_t
+  @callback delete(url, request_body, opts) :: response_t
 
   defmacro __using__(_) do
     quote do
