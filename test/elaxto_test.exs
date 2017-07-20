@@ -151,11 +151,47 @@ defmodule ElaxtoTest do
   end
 
   describe "delete/2" do
-    test "should execute a delte query" do
+    test "should execute a delete query" do
       Elaxto.TestElaxto.delete(:post)
 
       assert get_request
           == {:delete, "http://localhost:9200/test_post"}
+    end
+  end
+
+  describe "scan/3" do
+    test "should scan the index" do
+      pairs = [
+        {
+          {:post, "http://localhost:9200/test_post/post?scroll=1m", %{"query" => %{"bool" => %{"must" => %{"term" => [%{"key" => %{}}, "value"]}}}}},
+          %{"_scroll_id" => "1", "hits" => %{"hits" => [%{}, %{}]}}
+        },
+        {
+          {:post, "http://localhost:9200/_search/scroll", %{"scroll" => "1m", "scroll_id" => "1"}},
+          %{"_scroll_id" => "2", "hits" => %{"hits" => [%{}, %{}]}}
+        },
+        {
+          {:post, "http://localhost:9200/_search/scroll", %{"scroll" => "1m", "scroll_id" => "2"}},
+           %{"_scroll_id" => "3", "hits" => %{"hits" => []}}
+        }
+      ]
+
+      enum = Elaxto.TestElaxto.scan({"post", "post"}, query(
+        bool(
+          must: term(key, "value")
+        )
+      ), "1m")
+      [{req, resp} | pairs] = pairs
+      set_response({:ok, resp})
+      enum |> Enum.reduce({req, pairs}, fn
+        _response, {expect_request, []} ->
+          assert expect_request == get_request
+          {nil, []}
+        _response, {expect_request, [{req, resp}|tail]}->
+          assert expect_request == get_request
+          set_response({:ok, resp})
+         {req, tail}
+      end)
     end
   end
 end

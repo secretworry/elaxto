@@ -33,8 +33,12 @@ defmodule Elaxto do
       @host host
 
       def __http_adapter__, do: @http_adapter
+      
+      def __host__, do: @host
+      
+      def __config__, do: @config
 
-      defp build_request_uri(uri) do
+      def _build_request_uri(uri) do
         URI.merge(@host, uri) |> URI.to_string
       end
 
@@ -75,27 +79,78 @@ defmodule Elaxto do
 
       def get(queriable, opts \\ []) do
         uri = Elaxto.RequestBuilder.queriable_to_uri(@config, queriable, opts)
-        request_uri = build_request_uri(uri)
+        request_uri = _build_request_uri(uri)
         Elaxto.call_http_adapter(@http_adapter, :get, [request_uri])
       end
 
       def post(queriable, query, opts \\ []) do
         uri = Elaxto.RequestBuilder.queriable_to_uri(@config, queriable, opts)
-        request_uri = build_request_uri(uri)
+        request_uri = _build_request_uri(uri)
         Elaxto.call_http_adapter(@http_adapter, :post, [request_uri, query])
       end
 
       def put(queriable, query, opts \\ []) do
         uri = Elaxto.RequestBuilder.queriable_to_uri(@config, queriable, opts)
-        request_uri = build_request_uri(uri)
+        request_uri = _build_request_uri(uri)
         Elaxto.call_http_adapter(@http_adapter, :put, [request_uri, query])
       end
 
       def delete(queriable, opts \\ []) do
         uri = Elaxto.RequestBuilder.queriable_to_uri(@config, queriable, opts)
-        request_uri = build_request_uri(uri)
+        request_uri = _build_request_uri(uri)
         Elaxto.call_http_adapter(@http_adapter, :delete, [request_uri])
       end
+
+      defmodule ScanEnum do
+        require Elixir.Elaxto.Query
+        alias Elixir.Elaxto.Query
+        defstruct queriable: nil, query: nil, scroll: nil, opts: opts, scroll_id: nil, done: false
+
+        def new(queriable, query, scroll, opts) do
+          %__MODULE__{queriable: queriable, query: query, opts: opts, scroll: scroll}
+        end
+
+        defimpl Enumerable do
+          defp outer_scope, do: unquote(Module.split(__MODULE__) |> tl |> Enum.reverse |> tl |> Enum.reverse |> Module.concat)
+          def count(_), do: {:error, __MODULE__}
+          def member?(_, _), do: {:error, __MODULE__}
+
+          def reduce(_,     {:halt, acc}, _fun), do: {:halted, acc}
+          def reduce(enum,  {:suspend, acc}, fun), do: {:suspended, acc, &reduce(enum, &1, fun)}
+          def reduce(%{done: true}, {:cont, acc}, _fun), do: {:done, acc}
+          def reduce(enum, {:cont, acc}, fun) do
+            case Elaxto.call_http_adapter(outer_scope.__http_adapter__, :post, [request_uri(enum), query(enum)]) do
+              {:ok, response} ->
+                done = case response["hits"]["hits"] do
+                  [_|_] -> false
+                  _ -> true
+                end
+                scroll_id = response["_scroll_id"]
+                reduce(%{enum | scroll_id: scroll_id, done: done}, fun.(response, acc), fun)
+              {:error, err} ->
+                {:halted, acc}
+            end
+          end
+
+          defp request_uri(%{scroll_id: nil, queriable: queriable, query: query, opts: opts, scroll: scroll}) do
+            uri = Elaxto.RequestBuilder.queriable_to_uri(outer_scope.__config__, queriable, Keyword.put(opts, :scroll, scroll))
+            outer_scope._build_request_uri(uri)
+          end
+
+          defp request_uri(%{opts: opts}) do
+            uri = Elaxto.RequestBuilder.queriable_to_uri(outer_scope.__config__, {"_search", "scroll"}, opts)
+            outer_scope._build_request_uri(uri)
+          end
+
+          defp query(%{scroll_id: nil, query: query}), do: query
+          defp query(%{scroll_id: scroll_id, scroll: scroll}), do: %{"scroll" => scroll, "scroll_id" => scroll_id}
+        end
+      end
+
+      def scan(queriable, query, scroll, opts \\ []) do
+        ScanEnum.new(queriable, query, scroll, opts)
+      end
+
     end
   end
 

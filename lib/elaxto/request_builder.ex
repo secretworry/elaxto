@@ -63,8 +63,15 @@ defmodule Elaxto.RequestBuilder do
   end
 
   def prefix_index(%{prefix: prefix}, index) do
-    "#{prefix}#{index}"
+    prefix_non_special(prefix, index)
+  end
+  def prefix_index(_, index), do: index
+
+  defp prefix_non_special(prefix, index) do
+    case index |> to_string |> String.to_char_list do
+      '_' ++ _ -> index
+      _ -> "#{prefix}#{index}"
+    end
   end
 
-  def prefix_index(_, index), do: index
 end
